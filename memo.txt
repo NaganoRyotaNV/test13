@@ -1,0 +1,411 @@
+今日のまとめ
+
+進め方:
+朝デイリースクラム
+「前日行ったこと」「本日行うこと」「困っていること」 
+ 昼 
+何をやったか 今から何やるか
+
+今日やったこと:
+クラス図の確認 ER図の確認　モックの確認　コンセプトの確認
+見積作成
+
+まだできてないこと(やること)
+見積の時間配分
+ユーザを登録する
+ログインログアウト機能実装
+環境構築
+
+notionの移行先
+ソナーキューブ
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+本日まで作った中身の概要
+
+ご提示いただいたクラス図の内容を、機能・ページごとの遷移に基づいて簡潔に解説します。
+
+### ユーザー管理機能
+
+* 
+**ユーザー登録**: `RegisterUserForm` に入力された情報を受け取り、`RegisterUserController` と `RegisterUserService` を経由して `UserRepository` でユーザーを保存します 。
+
+
+* 
+**ログイン・ログアウト**: `LoginUserController` が `LoginUserService` を呼び出し、`LoginUserRepository` で認証（IDとパスワードの照合）を行います 。遷移先は商品一覧ページ（`product/index.html`）です 。
+
+
+
+### 商品閲覧機能
+
+* 
+**商品一覧表示**: `ShowProductListController` が `ShowProductListService` を介して `ProductRepository` から商品リストを取得し、画面に表示します 。
+
+
+* 
+**商品詳細表示**: `ShowProductDetailController` が特定のIDで `ShowProductDetailRepository` を検索し、商品の詳細情報を表示します 。
+
+
+
+### ショッピングカート操作機能
+
+* 
+**カートへの追加**: `AddCartProductController` がユーザーに紐づく注文状態を検索し、商品がなければ新規作成、あれば数量を+1する処理を行います 。
+
+
+* 
+**カートの表示**: `ShowCartOrderController` がユーザーIDをもとに、現在のカート内注文情報を取得して表示します 。
+
+
+* 
+**カートからの削除**: `RemoveCartProductController` により、カートから特定の注文商品を削除します 。
+
+
+* 
+**数量の減算**: `DecreaseCartProductController` が数量を判定し、2つ以上なら数量を減らし（UPDATE）、1つなら削除（DELETE）を行います 。
+
+
+
+### 注文確定機能
+
+* 
+**注文確認**: `ShowOrderConfirmationController` が注文IDとユーザーIDで該当する注文を取得し、確認画面（`orders/confirm.html`）を表示します 。
+
+
+* 
+**注文完了**: `OrderController` を通じて注文状態を変更（`changeOrderStatus`）し、完了画面（`orders/complete.html`）へ遷移します 。
+
+
+
+
+
+
+
+
+承知いたしました。ご提示いただいたクラス図の情報を基に、各メソッドが「何のために」「どのようなデータをやり取りしているか」という意図を明確にした表を作成しました。
+この表を見積もりの際の「作業内容のブレイクダウン（タスク分解）」の資料としてご活用ください。
+クラスメソッド詳細解説（意図と役割）
+クラス名
+メソッド名
+意図・役割
+引数・戻り値の意図
+RegisterUserController
+register
+ユーザー登録リクエストを処理し、結果画面へ遷移する
+Formの内容を受け取り、処理結果（画面遷移先）を返す
+
+
+showRegistrationForm
+登録画面を表示する
+画面表示に必要な初期状態を返す
+RegisterUserService
+register
+登録処理のビジネスロジックを実行する
+Formからドメインオブジェクトを生成し保存を依頼する
+UserRepository
+save
+データベースにユーザー情報を保存する
+ユーザーオブジェクトをDBへ永続化する
+LoginUserController
+loginUser
+ログイン認証リクエストを処理する
+認証結果に基づき、ログイン後のページへ遷移させる
+
+
+logoutUser
+ログアウト処理を要求する
+セッション破棄後、トップ/ログイン画面へ遷移させる
+LoginUserService
+loginUser
+ログイン認証のロジックを実行する
+認証に成功したユーザー情報を取得して返す
+LoginUserRepository
+findByIdAndPassword
+DBからユーザー情報を照合する
+名前とパスワードが一致するユーザーを検索する
+ShowProductListController
+showProductList
+商品一覧表示リクエストを処理する
+商品一覧ページを表示するための情報を準備する
+ShowProductListService
+getProductList
+ページングされた商品リストを取得する
+指定ページの商品データをDBから取得して返す
+ProductRepository
+findAll
+全商品（またはページ指定分）を検索する
+ページング情報を付与してProductを取得する
+ShowProductDetailController
+showProductDetail
+商品詳細ページ表示リクエストを処理する
+特定IDの商品ページを表示する
+ShowProductDetailService
+getProductById
+商品IDから詳細情報を取得する
+検索した結果（Product）をコントローラーに渡す
+AddCartProductController
+addCartProduct
+カート追加リクエストを処理する
+商品IDを受け取り、カート追加後の画面へ遷移する
+OrderRepository
+findCartOrderByUserId
+カート内の注文を探す
+ユーザーに紐づく「注文前」状態の注文を取得する
+
+
+insert
+注文を新規作成する
+新規注文レコードをDBに追加する
+OrderProductRepository
+findByOrderIdAndProductId
+カート内の特定商品を探す
+すでに同じ商品がカートにあるか確認する
+
+
+insert
+カートに商品を登録する
+中間テーブルに商品を追加する
+ShowCartOrderController
+showShoppingCart
+カート一覧表示リクエストを処理する
+ユーザーのカート情報を取得して画面に渡す
+RemoveCartProductController
+removeCartProduct
+カートから商品削除リクエストを処理する
+指定した商品をカートから削除する
+DecreaseCartProductController
+decreaseCartProduct
+カートの商品数量を減らすリクエストを処理する
+数量更新または削除の処理へ誘導する
+OrderProductRepository
+decreaseByOrderIdAndProductId
+カート内の数量を減らす
+DB上の数量をUPDATEする
+
+
+deleteByOrderIdAndProductId
+カートから商品を削除する
+DBからレコードをDELETEする
+ShowOrderConfirmationController
+showOrderConfirmation
+注文確認画面表示を処理する
+注文内容とユーザー情報を確認画面に渡す
+OrderController
+showOrderComplete
+注文完了画面を表示する
+確定後の完了メッセージを表示する
+OrderService
+order
+注文を確定させる
+注文ステータスを「注文中」から「確定」へ変更する
+
+見積もり作成のアドバイス
+この表を活用する際、以下の観点で「作業時間」を割り当てると、よりリーダーが納得しやすい見積もりになります。
+「Controller」の作業時間: 画面からの値の受け取り、バリデーション、戻り値（String）の作成時間。
+「Service」の作業時間: 複数のRepositoryを呼び出す複雑なロジックがある場合、その制御手順の検討時間。
+「Repository」の作業時間: SQLを書く時間、あるいはORM（JavaならSpring Data JPA等）の設定時間。
+「バッファ」の追加:
+初めて実装するロジック: 1.5〜2倍の時間（調査・試行錯誤を含む）。
+既存機能の修正: 影響範囲調査の時間。
+このリストを、見積もり表を作成する際の「タスク一覧」として使ってみてください。もし特定の機能について「これの時間が想像できない」というものがあれば、さらに具体的に分解しますので教えてください。
+
+
+
+
+
+
+
+
+ご提示いただいたクラス図に含まれる、各クラスのメソッド、引数、戻り値の構成を整理して解説します。
+1. ユーザー管理機能
+クラス名
+メソッド
+引数
+戻り値
+RegisterUserController
+register
+RegisterUserForm form
+String
+
+
+showRegistrationForm
+なし
+String
+RegisterUserService
+register
+RegisterUserForm form
+void
+UserRepository
+save
+User user
+void
+LoginUserController
+loginUser
+String name, String password
+String
+
+
+logoutUser
+なし
+String
+LoginUserService
+loginUser
+String name, String password
+User
+
+
+logoutUser
+なし
+User
+LoginUserRepository
+findByIdAndPassword
+String name, String password
+User
+
+2. 商品閲覧機能
+クラス名
+メソッド
+引数
+戻り値
+ShowProductListController
+showProductList
+なし
+String
+ShowProductListService
+getProductList
+int page
+Page<Product>
+ProductRepository
+findAll
+Pageable pageable
+Page<Product>
+ShowProductDetailController
+showProductDetail
+int productid
+String
+ShowProductDetailService
+getProductById
+int productid
+Product
+ProductRepository
+findById
+int id
+Product
+
+3. ショッピングカート・注文機能
+クラス名
+メソッド
+引数
+戻り値
+AddCartProductController
+addCartProduct
+Integer productid
+String
+OrderRepository
+findCartOrderByUserId
+UUID userid
+Optional<Order>
+
+
+insert
+UUID userid
+Order
+OrderProductRepository
+findByOrderIdAndProductId
+UUID orderid, Integer productid
+OrderProduct
+
+
+insert
+UUID orderid, Integer productid
+OrderProduct
+ShowCartOrderController
+showShoppingCart
+なし
+String
+ShowCartOrderService
+getCartOrder
+UUID userid
+Order
+RemoveCartProductController
+removeCartProduct
+UUID orderid, Integer productid
+String
+RemoveCartProductService
+removeCartProduct
+UUID orderid, Integer productid
+void
+OrderProductRepository
+deleteByOrderIdAndProductId
+UUID orderid, Integer productid
+void
+DecreaseCartProductController
+decreaseCartProduct
+UUID orderid, Integer productid
+String
+DecreaseCartProductService
+decreaseCartProduct
+UUID orderid, Integer productid
+void
+OrderProductRepository
+decreaseByOrderIdAndProductId
+UUID orderid, Integer productid
+void
+ShowOrderConfirmationController
+showOrderConfirmation
+int orderid, userid
+String
+ShowOrderConfirmationService
+getOrderConfirmation
+int orderid, userid
+Order
+ShowOrderConfirmationRepository
+findByOrderIdAndUserId
+int orderid, int userid
+Order
+OrderController
+showOrderComplete
+なし
+String
+OrderService
+order
+なし
+void
+OrderRepository
+changeOrderStatus
+なし
+void
+
+この図には、ユーザーの登録・認証から商品検索、カート操作、最終的な注文確定までの処理フローに必要なメソッド定義が含まれています 。
+
+
